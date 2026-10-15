@@ -1,0 +1,621 @@
+// Studio's 18 tables in schema `studio` (Database Design doc, FS-33).
+//
+// Rules the schema follows everywhere:
+// - workspace_id on every client-owned table. Parents carry UNIQUE (id,
+//   workspace_id) and children reference them with composite foreign keys, so
+//   the database refuses a row that points at another client's parent.
+// - Ids are UUIDv7 made by Postgres 18's uuidv7(); workspace.id is the billing
+//   client id and is never generated here.
+// - Times are timestamptz(3). Money is bigint (sen, micro-USD); credits are int.
+//
+// What Prisma cannot express lives in the migration SQL: CHECKs, partial
+// unique indexes, partial indexes and the grants to studio_app. A later
+// `prisma migrate dev` will offer to drop those partial indexes; keep them.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/**
+ * Enums: stable sets only. Sets that will grow are text + CHECK. ----------
+ */
+
+enum WorkspaceStatus {
+  active
+  read_only
+  deactivated
+
+  @@map("workspace_status")
+}
+
+enum ContentMode {
+  block
+  keyed
+
+  @@map("content_mode")
+}
+
+enum RequestType {
+  change
+  new_page
+
+  @@map("request_type")
+}
+
+enum RequestStatus {
+  draft
+  paused
+  submitted
+  building
+  checking
+  uat
+  live
+  pending_chi
+  closed
+
+  @@map("request_status")
+}
+
+enum CloseReason {
+  client_cancelled
+  no_reply
+  agent_closed
+
+  @@map("close_reason")
+}
+
+enum ChatRole {
+  client
+  ba
+
+  @@map("chat_role")
+}
+
+enum AttachmentPurpose {
+  screenshot
+  sketch
+
+  @@map("attachment_purpose")
+}
+
+enum AttachmentStatus {
+  pending
+  confirmed
+
+  @@map("attachment_status")
+}
+
+enum PatchStatus {
+  draft
+  applied
+  rejected
+  reverted
+
+  @@map("patch_status")
+}
+
+enum CheckResult {
+  pass
+  fail
+
+  @@map("check_result")
+}
+
+enum LedgerKind {
+  grant
+  topup
+  usage
+  adjust
+  refund
+
+  @@map("ledger_kind")
+}
+
+enum CreditBucket {
+  grant
+  topup
+
+  @@map("credit_bucket")
+}
+
+enum TopupStatus {
+  requested
+  paid
+  approved
+  cancelled
+
+  @@map("topup_status")
+}
+
+enum BudgetScope {
+  month
+  request
+
+  @@map("budget_scope")
+}
+
+enum ReservationStatus {
+  reserved
+  settled
+  released
+
+  @@map("reservation_status")
+}
+
+enum AgentStatus {
+  active
+  retired
+
+  @@map("agent_status")
+}
+
+enum TaskStatus {
+  queued
+  working
+  waiting
+  done
+
+  @@map("task_status")
+}
+
+/**
+ * Clients and sites --------------------------------------------------------
+ */
+
+/// One per billing client, plus one for Chi's own work. Balances are cached
+/// from credit_ledger in the same transaction as each ledger insert.
+model Workspace {
+  /// = billing.client.id = the auth token's client_id. Never generated here.
+  id            Int             @id
+  name          String          @db.VarChar(200)
+  status        WorkspaceStatus @default(active)
+  grantBalance  Int             @default(0) @map("grant_balance")
+  topupBalance  Int             @default(0) @map("topup_balance")
+  creditsHeld   Int             @default(0) @map("credits_held")
+  monthlyGrant  Int             @default(200) @map("monthly_grant")
+  aiCapMicroUsd BigInt          @map("ai_cap_micro_usd")
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt     DateTime?       @map("deleted_at") @db.Timestamptz(3)
+
+  sites          Site[]
+  manifests      SiteManifest[]
+  requests       Request[]
+  requestEvents  RequestEvent[]
+  chatMessages   ChatMessage[]
+  attachments    Attachment[]
+  patches        Patch[]
+  checkRuns      CheckRun[]
+  ledger         CreditLedger[]
+  topups         TopupRequest[]
+  aiBudgets      AiBudget[]
+  aiReservations AiReservation[]
+  aiUsage        AiUsage[]
+  tasks          Task[]
+  auditLog       AuditLog[]
+
+  @@map("workspace")
+}
+
+model Site {
+  id             String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId    Int         @map("workspace_id")
+  domain         String      @db.VarChar(253)
+  repoProvider   String      @map("repo_provider") @db.VarChar(20)
+  repo           String      @db.VarChar(200)
+  prodBranch     String      @map("prod_branch") @db.VarChar(100)
+  devBranch      String      @map("dev_branch") @db.VarChar(100)
+  hosting        String      @db.VarChar(40)
+  hostingProject String      @map("hosting_project") @db.VarChar(200)
+  contentMode    ContentMode @map("content_mode")
+  languages      String[]
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt      DateTime?   @map("deleted_at") @db.Timestamptz(3)
+
+  workspace Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  manifests SiteManifest[]
+  requests  Request[]
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId])
+  @@map("site")
+}
+
+/// The newest row by built_at is the current manifest; all rows are kept.
+model SiteManifest {
+  id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  siteId      String   @map("site_id") @db.Uuid
+  workspaceId Int      @map("workspace_id")
+  commitSha   String   @map("commit_sha") @db.VarChar(40)
+  manifest    Json
+  builtAt     DateTime @map("built_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  site      Site      @relation(fields: [siteId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+
+  @@unique([siteId, commitSha])
+  @@index([siteId, builtAt(sort: Desc)])
+  @@index([workspaceId])
+  @@map("site_manifest")
+}
+
+/**
+ * Requests, chat, patches and checks ---------------------------------------
+ */
+
+model Request {
+  id                  String        @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId         Int           @map("workspace_id")
+  siteId              String        @map("site_id") @db.Uuid
+  /// Shown to the client as #43. Unique per workspace; routes take the id.
+  number              Int
+  title               String        @db.VarChar(200)
+  type                RequestType
+  status              RequestStatus @default(draft)
+  /// Set only when status = closed (CHECK).
+  closeReason         CloseReason?  @map("close_reason")
+  creditsPrice        Int           @default(0) @map("credits_price")
+  /// This request's share of workspace.credits_held.
+  creditsHeld         Int           @default(0) @map("credits_held")
+  requirementsSummary String?       @map("requirements_summary")
+  branch              String?       @db.VarChar(200)
+  prUrl               String?       @map("pr_url")
+  previewUrl          String?       @map("preview_url")
+  jiraKey             String?       @map("jira_key") @db.VarChar(20)
+  /// New pages: the 2–3 options shown (placeholder text only). Checked with zod before every write.
+  layoutOptions       Json?         @map("layout_options")
+  /// New pages: the picked option as it grows into the plan. Checked with zod before every write.
+  pagePlan            Json?         @map("page_plan")
+  signedOffAt         DateTime?     @map("signed_off_at") @db.Timestamptz(3)
+  uatSentAt           DateTime?     @map("uat_sent_at") @db.Timestamptz(3)
+  liveAt              DateTime?     @map("live_at") @db.Timestamptz(3)
+  /// Why the request is in Chi's queue.
+  remark              String?
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  site           Site            @relation(fields: [siteId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+  events         RequestEvent[]
+  messages       ChatMessage[]
+  attachments    Attachment[]
+  patches        Patch[]
+  checkRuns      CheckRun[]
+  ledger         CreditLedger[]
+  aiBudgets      AiBudget[]
+  aiReservations AiReservation[]
+  aiUsage        AiUsage[]
+  tasks          Task[]
+
+  @@unique([id, workspaceId])
+  @@unique([workspaceId, number])
+  @@index([workspaceId, status])
+  @@map("request")
+}
+
+/// Append-only history of every status change, written in the same
+/// transaction as the update. Exactly one actor is set (CHECK).
+model RequestEvent {
+  id             String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  requestId      String         @map("request_id") @db.Uuid
+  workspaceId    Int            @map("workspace_id")
+  fromStatus     RequestStatus? @map("from_status")
+  toStatus       RequestStatus  @map("to_status")
+  actorAccountId String?        @map("actor_account_id") @db.VarChar(64)
+  actorAgent     String?        @map("actor_agent") @db.VarChar(40)
+  note           String?
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  request   Request   @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+
+  @@index([requestId, createdAt])
+  @@index([workspaceId])
+  @@map("request_event")
+}
+
+model ChatMessage {
+  id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  requestId   String   @map("request_id") @db.Uuid
+  workspaceId Int      @map("workspace_id")
+  seq         Int
+  role        ChatRole
+  content     String
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  request     Request      @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  attachments Attachment[]
+
+  @@unique([id, workspaceId])
+  @@unique([requestId, seq])
+  @@index([workspaceId])
+  @@map("chat_message")
+}
+
+/// The image lives in R2 under ws/<workspace_id>/req/<request_id>/<uuid>.webp.
+model Attachment {
+  id          String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId Int               @map("workspace_id")
+  requestId   String            @map("request_id") @db.Uuid
+  messageId   String?           @map("message_id") @db.Uuid
+  purpose     AttachmentPurpose
+  r2Key       String            @unique @map("r2_key") @db.VarChar(300)
+  mime        String            @db.VarChar(20)
+  bytes       Int
+  width       Int?
+  height      Int?
+  status      AttachmentStatus  @default(pending)
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  request   Request      @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  message   ChatMessage? @relation(fields: [messageId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([messageId])
+  @@index([workspaceId])
+  @@map("attachment")
+}
+
+/// The structured patch from the content spec. merge_commit is what a git revert undoes.
+model Patch {
+  id          String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  requestId   String      @map("request_id") @db.Uuid
+  workspaceId Int         @map("workspace_id")
+  baseCommit  String      @map("base_commit") @db.VarChar(40)
+  changes     Json
+  status      PatchStatus @default(draft)
+  mergeCommit String?     @map("merge_commit") @db.VarChar(40)
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  request   Request    @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+  checkRuns CheckRun[]
+
+  @@unique([id, workspaceId])
+  @@index([requestId])
+  @@index([workspaceId])
+  @@map("patch")
+}
+
+/// One row per check per attempt, so a retry keeps the first failure.
+model CheckRun {
+  id          String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  requestId   String       @map("request_id") @db.Uuid
+  workspaceId Int          @map("workspace_id")
+  patchId     String?      @map("patch_id") @db.Uuid
+  /// text + CHECK: the set of checks will grow.
+  check       String       @db.VarChar(40)
+  attempt     Int          @default(1)
+  result      CheckResult?
+  detail      String?
+  startedAt   DateTime     @default(now()) @map("started_at") @db.Timestamptz(3)
+  finishedAt  DateTime?    @map("finished_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  request   Request   @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+  patch     Patch?    @relation(fields: [patchId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+
+  @@unique([requestId, patchId, check, attempt])
+  @@index([patchId])
+  @@index([workspaceId])
+  @@map("check_run")
+}
+
+/**
+ * Credits, top-ups, AI budget and usage ------------------------------------
+ */
+
+/// Append-only. Credits change only by inserting rows here; workspace
+/// balances are a cache. A usage spanning both buckets is two rows.
+model CreditLedger {
+  id             String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId    Int          @map("workspace_id")
+  kind           LedgerKind
+  bucket         CreditBucket
+  /// Signed: + adds, − spends.
+  credits        Int
+  requestId      String?      @map("request_id") @db.Uuid
+  topupRequestId String?      @map("topup_request_id") @db.Uuid
+  /// The month a grant or reset belongs to, e.g. 2026-10.
+  period         String?      @db.VarChar(7)
+  /// grant:2026-10, topup:<id>, usage:<request_id>:<action>
+  idemKey        String       @map("idem_key") @db.VarChar(120)
+  createdBy      String?      @map("created_by") @db.VarChar(64)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  request   Request?      @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+  topup     TopupRequest? @relation(fields: [topupRequestId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+
+  @@unique([workspaceId, idemKey])
+  @@index([workspaceId, createdAt])
+  @@index([requestId])
+  @@index([topupRequestId])
+  @@map("credit_ledger")
+}
+
+/// Approval writes the ledger row keyed topup:<id>, so approving twice adds credits once.
+model TopupRequest {
+  id          String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId Int         @map("workspace_id")
+  pack        Int
+  credits     Int
+  amountSen   BigInt      @map("amount_sen")
+  status      TopupStatus @default(requested)
+  billingRef  String?     @unique @map("billing_ref") @db.VarChar(100)
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  ledger    CreditLedger[]
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId])
+  @@map("topup_request")
+}
+
+/// The hidden real-cost cap. A month row has period and no request_id; a
+/// request row the reverse (CHECK).
+model AiBudget {
+  id               String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId      Int         @map("workspace_id")
+  scope            BudgetScope
+  period           String?     @db.VarChar(7)
+  requestId        String?     @map("request_id") @db.Uuid
+  capMicroUsd      BigInt      @map("cap_micro_usd")
+  spentMicroUsd    BigInt      @default(0) @map("spent_micro_usd")
+  reservedMicroUsd BigInt      @default(0) @map("reserved_micro_usd")
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace    Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  request      Request?        @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+  reservations AiReservation[]
+
+  @@unique([id, workspaceId])
+  @@index([workspaceId])
+  @@map("ai_budget")
+}
+
+model AiReservation {
+  id             String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  budgetId       String            @map("budget_id") @db.Uuid
+  workspaceId    Int               @map("workspace_id")
+  requestId      String?           @map("request_id") @db.Uuid
+  agent          String            @db.VarChar(40)
+  amountMicroUsd BigInt            @map("amount_micro_usd")
+  status         ReservationStatus @default(reserved)
+  /// About 2 minutes for a BA call, 30 for an agent run.
+  expiresAt      DateTime          @map("expires_at") @db.Timestamptz(3)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  budget    AiBudget  @relation(fields: [budgetId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+  request   Request?  @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+  usage     AiUsage[]
+
+  @@unique([id, workspaceId])
+  @@index([requestId])
+  @@index([workspaceId])
+  @@map("ai_reservation")
+}
+
+/// Append-only. cost_micro_usd (rounded up) drives caps; cost_usd_exact is for
+/// internal analysis only. Prices and FX are snapshotted per row.
+model AiUsage {
+  id                String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId       Int      @map("workspace_id")
+  requestId         String?  @map("request_id") @db.Uuid
+  reservationId     String?  @map("reservation_id") @db.Uuid
+  providerMessageId String   @unique @map("provider_message_id") @db.VarChar(100)
+  agent             String   @db.VarChar(40)
+  model             String   @db.VarChar(80)
+  inputTokens       Int      @map("input_tokens")
+  outputTokens      Int      @map("output_tokens")
+  cacheReadTokens   Int      @default(0) @map("cache_read_tokens")
+  cacheWriteTokens  Int      @default(0) @map("cache_write_tokens")
+  costMicroUsd      BigInt   @map("cost_micro_usd")
+  costUsdExact      Decimal  @map("cost_usd_exact") @db.Decimal(20, 10)
+  priceSnapshot     Json     @map("price_snapshot")
+  fxRate            Decimal  @map("fx_rate") @db.Decimal(12, 6)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  request     Request?       @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+  reservation AiReservation? @relation(fields: [reservationId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+
+  @@index([workspaceId, createdAt])
+  @@index([requestId])
+  @@index([reservationId])
+  @@map("ai_usage")
+}
+
+/**
+ * Office, settings and audit -----------------------------------------------
+ */
+
+/// Studio-wide, so no workspace_id. A desk shows the agent's task whose status is working.
+model Agent {
+  id           String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name         String      @db.VarChar(40)
+  role         String      @db.VarChar(80)
+  skills       String[]
+  tools        String[]
+  model        String      @db.VarChar(80)
+  /// text + CHECK: ba, dev, qa, review, none.
+  pipelineStep String      @default("none") @map("pipeline_step") @db.VarChar(20)
+  status       AgentStatus @default(active)
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt    DateTime?   @map("deleted_at") @db.Timestamptz(3)
+
+  tasks Task[]
+
+  @@map("agent")
+}
+
+/// One working task per agent at a time (partial unique). Other clients see
+/// only "working on a client project".
+model Task {
+  id          String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId Int        @map("workspace_id")
+  agentId     String     @map("agent_id") @db.Uuid
+  requestId   String?    @map("request_id") @db.Uuid
+  title       String     @db.VarChar(200)
+  publicLabel String     @map("public_label") @db.VarChar(200)
+  status      TaskStatus @default(queued)
+  isVisible   Boolean    @default(false) @map("is_visible")
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  agent     Agent     @relation(fields: [agentId], references: [id], onDelete: Restrict)
+  request   Request?  @relation(fields: [requestId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+
+  @@index([workspaceId, status])
+  @@index([agentId])
+  @@index([requestId])
+  @@map("task")
+}
+
+/// Pricing config: credit price per action, monthly grant, AI caps, FX rate,
+/// model prices. Every change is written to audit_log.
+model Setting {
+  key       String   @id @db.VarChar(80)
+  value     Json
+  updatedBy String?  @map("updated_by") @db.VarChar(64)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("setting")
+}
+
+/// Append-only. before/after hold ids and changed fields only, never chat text.
+/// workspace_id is null for Studio-wide changes (settings, agents).
+model AuditLog {
+  id             String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workspaceId    Int?     @map("workspace_id")
+  actorAccountId String?  @map("actor_account_id") @db.VarChar(64)
+  actorAgent     String?  @map("actor_agent") @db.VarChar(40)
+  action         String   @db.VarChar(80)
+  entity         String   @db.VarChar(40)
+  entityId       String   @map("entity_id") @db.VarChar(64)
+  before         Json?
+  after          Json?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+
+  @@index([workspaceId, createdAt])
+  @@map("audit_log")
+}

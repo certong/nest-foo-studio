@@ -5,9 +5,10 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { ErrorFilter } from './common/error.filter';
 import { HealthController } from './health/health.controller';
 import { PortalModule } from './portal/portal.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PortalModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, PortalModule],
   controllers: [HealthController],
   providers: [
     // Request bodies, queries and params are parsed with the contract's zod schemas…
