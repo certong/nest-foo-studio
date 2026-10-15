@@ -2,11 +2,13 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
+import { configureApp } from './app-setup';
 import { AppModule } from './app.module';
 import { buildOpenApiDocument } from './openapi';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  configureApp(app);
   app.enableShutdownHooks();
 
   const config = app.get(ConfigService);

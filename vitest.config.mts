@@ -13,7 +13,8 @@ export default defineConfig({
     // The deployed image (no TZ set) runs UTC, so the suite runs UTC too —
     // otherwise time-based behaviour (reset dates, reply-by) can
     // pass on a developer's machine in +07 and fail in the container.
-    env: { TZ: 'UTC' },
+    // STUDIO_WEB_ORIGINS: configureApp() refuses to start without an allowlist.
+    env: { TZ: 'UTC', STUDIO_WEB_ORIGINS: 'http://localhost:5182' },
   },
   plugins: [
     // Nest resolves constructor dependencies from `emitDecoratorMetadata`, which
