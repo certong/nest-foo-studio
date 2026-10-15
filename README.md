@@ -2,9 +2,10 @@
 
 Studio's backend: the client portal API (`/portal`), plus admin, internal and live-update routes as they land. Source of truth for the endpoints: the **foo-studio — Backend API List** doc. Sign-in and PINs stay in `nest-foo-auth`; Studio only checks its tokens.
 
-## Status: contract only (FS-85)
+## Status
 
-All 35 `/portal` routes exist, with their real paths, request/response schemas and error replies. Each handler answers `501 NOT_IMPLEMENTED` with `details.ticket` naming the ticket that builds it (FS-86…FS-103).
+- **Contract (FS-85):** all 35 `/portal` routes exist, with their real paths, request/response schemas and error replies. Each handler answers `501 NOT_IMPLEMENTED` with `details.ticket` naming the ticket that builds it (FS-86…FS-103).
+- **Database (FS-33):** schema `studio`, 18 tables, roles and the Kopi Lane seed. No route reads it yet.
 
 ## For the frontend
 
@@ -36,11 +37,28 @@ src/portal/     controllers and DTOs over the contract
 src/openapi.ts  builds the document for /docs and openapi.json
 ```
 
+## Database
+
+Schema `studio` in `foo_platform`, beside `auth` and `billing`. The source of truth is the **foo-studio — Database Design** doc.
+
+- `prisma/schema.prisma` has the tables. Its migrations add what Prisma can't express: CHECKs, partial indexes, and `studio_app`'s grants. A later `prisma migrate dev` will offer to drop those partial indexes; keep them.
+- Ids are UUIDv7 from Postgres 18's `uuidv7()`. `workspace.id` is the billing client id.
+- `scripts/roles/` sets up an environment's two roles (`studio_migrator`, `studio_app`). Create them over SQL, never in the Neon console; [scripts/roles/README.md](scripts/roles/README.md) explains why.
+
+Locally, against the Docker Postgres 18 container:
+
+```sh
+npm run prisma:deploy   # apply migrations to DATABASE_URL
+npm run seed            # Kopi Lane, "State B": #37–#43, 220 free credits
+npm run test:db         # throwaway databases on TEST_DATABASE_URL
+```
+
 ## Commands
 
 ```sh
 npm run start:dev   # :3002, Swagger UI at /docs
-npm test            # vitest
+npm test            # vitest (no database)
+npm run test:db     # database rules, on TEST_DATABASE_URL
 npm run openapi     # regenerate openapi.json after changing a schema or route
 ```
 

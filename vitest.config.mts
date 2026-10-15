@@ -9,7 +9,8 @@ export default defineConfig({
     // `*spec.ts`, not `*.spec.ts`: the endpoint suites follow Nest's
     // `*.e2e-spec.ts` convention, which has a hyphen rather than a dot.
     include: ['src/**/*.spec.ts', 'test/**/*spec.ts'],
-    exclude: ['node_modules/**'],
+    // The database suite has its own config (vitest.db.config.mts, npm run test:db).
+    exclude: ['test/db/**', 'node_modules/**'],
     // The deployed image (no TZ set) runs UTC, so the suite runs UTC too —
     // otherwise time-based behaviour (reset dates, reply-by) can
     // pass on a developer's machine in +07 and fail in the container.
