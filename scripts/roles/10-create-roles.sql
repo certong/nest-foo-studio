@@ -35,9 +35,17 @@ SELECT format('GRANT CONNECT ON DATABASE %I TO studio_migrator, studio_app', cur
 
 CREATE SCHEMA IF NOT EXISTS studio AUTHORIZATION studio_migrator;
 ALTER SCHEMA studio OWNER TO studio_migrator;
+
+-- The rest is studio_migrator's to give: as the owner it grants the schema,
+-- and default privileges can only be set by the role itself (a SET-only
+-- membership is not enough on Neon, where the owner is not a superuser).
+SET ROLE studio_migrator;
+
 GRANT USAGE ON SCHEMA studio TO studio_app;
 
 -- Tables that later migrations create are readable and writable by the API.
 -- A migration that adds an append-only table must REVOKE UPDATE, DELETE itself.
-ALTER DEFAULT PRIVILEGES FOR ROLE studio_migrator IN SCHEMA studio
+ALTER DEFAULT PRIVILEGES IN SCHEMA studio
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO studio_app;
+
+RESET ROLE;

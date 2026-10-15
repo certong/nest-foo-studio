@@ -38,3 +38,13 @@ Generate the two passwords fresh for each environment, and keep them in that env
 ## When a migration adds a table
 
 `studio_app` gets read and write on it automatically (default privileges from `10-create-roles.sql`). If the new table is append-only, the migration that creates it must `REVOKE UPDATE, DELETE … FROM studio_app`, and `20-grants.sql` and `30-verify.sql` must list it too.
+
+## Where it has been applied
+
+| Environment | Date | Roles in `neon_superuser` | `30-verify.sql` | Seed |
+|---|---|---|---|---|
+| Local Docker Postgres 18.6 (`foo_platform`) | 2026-10-16 | n/a (no Neon) | 12/12 ok | Kopi Lane, workspace 9001 |
+| Neon development (`ep-divine-hat`, Postgres 18.6) | 2026-10-16 | no | 12/12 ok | Kopi Lane, workspace 9001, seeded as `studio_app` |
+| Neon UAT, production | not yet | | | |
+
+On Neon the database owner (`foo_development_app`) is not a superuser, so `10-create-roles.sql` and `20-grants.sql` switch to `studio_migrator` (`SET ROLE`) for what only the schema owner can grant. Run as the owner, they print no warnings; a stream of "no privileges were granted" warnings means they ran as the wrong role.
