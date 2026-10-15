@@ -167,12 +167,13 @@ export function mapStatus(input: MapStatusInput): StatusView {
 
 /* Top-ups ---------------------------------------------------------------- */
 
-export const TopupStatus = z.enum(['requested', 'approved', 'cancelled']).meta({ id: 'TopupStatus' });
+export const TopupStatus = z.enum(['requested', 'paid', 'approved', 'cancelled']).meta({ id: 'TopupStatus' });
 export type TopupStatus = z.infer<typeof TopupStatus>;
 
-/** Only "requested" is fixed by FS-85; the other two are placeholders for FS-95. */
+/** Only "requested" is fixed by FS-85; the others are placeholders for FS-95. */
 const TOPUP_BADGES: Record<TopupStatus, string> = {
   requested: 'Waiting for payment',
+  paid: 'Checking payment',
   approved: 'Credits added',
   cancelled: 'Cancelled',
 };

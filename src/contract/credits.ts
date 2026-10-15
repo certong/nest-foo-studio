@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Credits, Id, IsoDate, IsoDateTime, IsoMonth } from './common';
+import { Credits, Id, IsoDate, IsoDateTime, IsoMonth, RequestNumber } from './common';
 import { mapTopupBadge, TopupStatus } from './status';
 
 /**
@@ -9,7 +9,7 @@ import { mapTopupBadge, TopupStatus } from './status';
  */
 export const CreditsBlock = z
   .object({
-    free: Credits.describe('monthly.free + topup.free'),
+    free: Credits.describe('monthly.free + topup.free; held credits are already taken out'),
     monthly: z.object({
       free: Credits,
       grant: Credits.describe('Granted on the 1st (200)'),
@@ -21,7 +21,7 @@ export const CreditsBlock = z
       neverExpires: z.literal(true),
     }),
     held: Credits,
-    heldFor: z.array(z.object({ requestId: Id, credits: Credits })),
+    heldFor: z.array(z.object({ requestId: Id, requestNumber: RequestNumber, credits: Credits })),
   })
   .meta({ id: 'CreditsBlock' });
 
@@ -37,8 +37,12 @@ export const CreditsResponse = CreditsBlock.extend({
 
 export const LedgerQuery = z.object({ month: IsoMonth });
 
+/**
+ * credit_ledger.kind, plus `held`: a request's hold is not a ledger row (it lives in
+ * credits_held) but the "This month" timeline shows it ("20 set aside").
+ */
 export const LedgerKind = z
-  .enum(['grant', 'charge', 'hold', 'release', 'topup', 'adjust', 'expire'])
+  .enum(['grant', 'topup', 'usage', 'adjust', 'refund', 'held'])
   .meta({ id: 'LedgerKind' });
 
 /** GET /portal/credits/ledger?month=2026-10: "+200, −20, −15, 20 set aside" */
@@ -46,12 +50,13 @@ export const LedgerResponse = z.object({
   month: IsoMonth,
   entries: z.array(
     z.object({
-      id: Id,
+      id: z.string().describe('The ledger row id, or held:<requestId> for a hold'),
       at: IsoDateTime,
       kind: LedgerKind,
       credits: z.number().int().describe('Signed: + adds, − spends; a hold shows the amount set aside'),
-      bucket: z.enum(['grant', 'topup']).nullable().describe('null for holds and releases'),
+      bucket: z.enum(['grant', 'topup']).nullable().describe('null for held lines'),
       requestId: Id.nullable(),
+      requestNumber: RequestNumber.nullable(),
       label: z.string(),
     }),
   ),

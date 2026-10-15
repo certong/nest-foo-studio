@@ -8,7 +8,7 @@ import { RequestCard } from './requests';
 export const ChatMessage = z
   .object({
     seq: z.number().int().positive(),
-    role: z.enum(['client', 'ba', 'system']).describe('ba = agent-ba'),
+    role: z.enum(['client', 'ba']).describe('ba = agent-ba'),
     content: z.string(),
     attachmentIds: z.array(Id),
     createdAt: IsoDateTime,
@@ -97,7 +97,7 @@ export const CreateAttachmentBody = z.object({
   requestId: Id,
   purpose: z.enum(['screenshot', 'sketch']),
   mime: z.enum(['image/png', 'image/jpeg', 'image/webp']),
-  bytes: z.number().int().positive().max(10 * 1024 * 1024),
+  bytes: z.number().int().positive().max(5 * 1024 * 1024).describe('At most 5 MB; at most 5 images per request'),
 });
 
 export const CreateAttachmentResponse = z.object({

@@ -13,7 +13,7 @@ export const Block = z
   .meta({ id: 'Block' });
 
 export const Layout = z
-  .object({ id: Id.describe('thumbnailId'), name: z.string(), blocks: z.array(Block) })
+  .object({ id: z.string().min(1).describe('thumbnailId'), name: z.string(), blocks: z.array(Block) })
   .meta({ id: 'Layout' });
 
 /** GET /portal/layouts: 5–6 thumbnails. */
@@ -23,7 +23,7 @@ export const LayoutsResponse = z.object({ items: z.array(Layout) });
 export const LayoutOptionsBody = z
   .object({
     attachmentId: Id.optional().describe('An uploaded sketch'),
-    thumbnailId: Id.optional().describe('A layout from GET /portal/layouts'),
+    thumbnailId: z.string().min(1).optional().describe('A layout from GET /portal/layouts'),
   })
   .refine((body) => (body.attachmentId === undefined) !== (body.thumbnailId === undefined), {
     message: 'Send exactly one of attachmentId or thumbnailId',
@@ -38,7 +38,7 @@ export const LayoutOptionsResponse = z.object({
 });
 
 export const LayoutOptionParams = z.object({
-  id: z.coerce.number().int().positive(),
+  id: Id,
   optionId: z.string().min(1),
 });
 
@@ -63,7 +63,7 @@ export const CreatePreviewResponse = z.object({
 });
 
 export const PreviewParams = z.object({
-  id: z.coerce.number().int().positive(),
+  id: Id,
   n: z.coerce.number().int().positive(),
 });
 

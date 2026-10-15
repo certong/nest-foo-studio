@@ -45,7 +45,7 @@ describe('error codes', () => {
 
 describe('ErrorFilter', () => {
   it('sends a StudioException as its code, status and details', () => {
-    const details = { needed: 20, have: 10, short: 10, resetOn: '2026-11-01', draftId: 43 };
+    const details = { needed: 20, have: 10, short: 10, resetOn: '2026-11-01', draftId: '0199e5a8-7c00-7a43-9d1e-5b2f0c3a4e43' };
     const { status, body } = reply(new StudioException('NOT_ENOUGH_CREDITS', details));
     expect(status).toBe(402);
     expect(body).toEqual({ code: 'NOT_ENOUGH_CREDITS', message: ERRORS.NOT_ENOUGH_CREDITS.when, details });
