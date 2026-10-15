@@ -15,9 +15,12 @@ export const IsoDate = z.iso.date();
 /** Calendar month, e.g. 2026-10 (ledger and usage charts). */
 export const IsoMonth = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Expected YYYY-MM');
 
-/** Database ids are integers (request #43). Path params arrive as strings. */
-export const Id = z.number().int().positive();
-export const IdParam = z.object({ id: z.coerce.number().int().positive() });
+/** Studio's rows have UUIDv7 ids (Database Design). Requests also carry a per-workspace number (#43). */
+export const Id = z.uuid();
+export const IdParam = z.object({ id: Id });
+
+/** A request's number within its workspace, shown as "#43". Display only: routes take the id. */
+export const RequestNumber = z.number().int().positive();
 
 /** A credit amount. Signed only where a ledger row says so. */
 export const Credits = z.number().int().nonnegative();

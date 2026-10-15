@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Credits, Id, IsoDate, IsoDateTime, IsoMonth, page, PageQuery } from './common';
+import { Credits, Id, IsoDate, IsoDateTime, IsoMonth, page, PageQuery, RequestNumber } from './common';
 import { CreditsBlock } from './credits';
 import { RequestType, StatusView } from './status';
 
@@ -14,17 +14,17 @@ export const MeResponse = z.object({
   }),
   credits: CreditsBlock,
 }).meta({
-  // The sample reply from the Backend API List: Kopi Lane, seed data.
+  // Kopi Lane seed, "State B": 220 free = 125 monthly (200 − 55 used − 20 held) + 95 top-up.
   examples: [
     {
       account: { name: 'Mei Ling', email: 'hello@kopilane.com' },
       workspace: { name: 'Kopi Lane', status: 'active', site: 'kopilane.com' },
       credits: {
-        free: 125,
+        free: 220,
         monthly: { free: 125, grant: 200, used: 55, resetOn: '2026-11-01' },
-        topup: { free: 0, neverExpires: true },
+        topup: { free: 95, neverExpires: true },
         held: 20,
-        heldFor: [{ requestId: 43, credits: 20 }],
+        heldFor: [{ requestId: '0199e5a8-7c00-7a43-9d1e-5b2f0c3a4e43', requestNumber: 43, credits: 20 }],
       },
     },
   ],
@@ -34,6 +34,7 @@ export const MeResponse = z.object({
 
 export const RequestCard = StatusView.extend({
   id: Id,
+  number: RequestNumber,
   type: RequestType,
   title: z.string(),
   replyBy: IsoDate.nullable().describe('Set while it is the client’s turn'),
