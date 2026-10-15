@@ -10,12 +10,12 @@ All 35 `/portal` routes exist, with their real paths, request/response schemas a
 
 `openapi.json` at the repo root is the contract (OpenAPI 3.1). Use it directly; you don't need to run this server.
 
-```sh
-# Types
-npx openapi-typescript ../nest-foo-studio/openapi.json -o src/api/schema.d.ts
+react-foo-studio has scripts for generating types and running a mock (FS-104). They read `../../Nest/nest-foo-studio/openapi.json` (the two repos live in `~/Workspace/React` and `~/Workspace/Nest`); set `OPENAPI_FILE` to use another path.
 
-# A mock server on :4010 (add `Prefer: code=402` to get an error reply)
-npx @stoplight/prism-cli mock ../nest-foo-studio/openapi.json
+```sh
+# in react-foo-studio
+npm run api:types   # openapi-typescript → src/api/schema.d.ts (committed there)
+npm run mock:api    # Prism mock on :4010; add `Prefer: code=402` for an error reply
 ```
 
 Conventions, also in the spec's description:
