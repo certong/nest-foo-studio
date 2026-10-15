@@ -1,0 +1,6117 @@
+{
+  "openapi": "3.1.0",
+  "paths": {
+    "/portal/me": {
+      "get": {
+        "description": "Screen 3, nav",
+        "operationId": "RequestsController_me",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Account, workspace, site domain, status, credit meter",
+        "tags": [
+          "Home, requests and progress"
+        ]
+      }
+    },
+    "/portal/home": {
+      "get": {
+        "description": "Screen 3",
+        "operationId": "RequestsController_home",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HomeResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One focus action, requests waiting for the client, credits per month",
+        "tags": [
+          "Home, requests and progress"
+        ]
+      }
+    },
+    "/portal/requests": {
+      "get": {
+        "description": "Screen 4",
+        "operationId": "RequestsController_list",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "tab",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "active",
+              "$ref": "#/components/schemas/RequestTab"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListRequestsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Request cards with badge, steps and replyBy; count per tab",
+        "tags": [
+          "Home, requests and progress"
+        ]
+      },
+      "post": {
+        "description": "Screen 6",
+        "operationId": "RequestsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateRequestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "New draft plus agent-ba’s greeting",
+        "tags": [
+          "Home, requests and progress"
+        ]
+      }
+    },
+    "/portal/requests/summary": {
+      "get": {
+        "description": "Screen 4b",
+        "operationId": "RequestsController_summary",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestsSummaryResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Past request totals (changes done, pages live)",
+        "tags": [
+          "Home, requests and progress"
+        ]
+      }
+    },
+    "/portal/requests/{id}": {
+      "get": {
+        "description": "Screen 13",
+        "operationId": "RequestsController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detail, dated timeline, what was signed off, actions allowed now",
+        "tags": [
+          "Home, requests and progress"
+        ]
+      }
+    },
+    "/portal/requests/{id}/messages": {
+      "get": {
+        "description": "Screens 6–9",
+        "operationId": "ChatController_messages",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "before",
+            "required": false,
+            "in": "query",
+            "description": "seq; omit for the newest",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessagesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One request’s chat, newest first, paged by seq",
+        "tags": [
+          "Chat and drafts"
+        ]
+      },
+      "post": {
+        "description": "Screens 6–9. The first planned change holds 20 credits.",
+        "operationId": "ChatController_send",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostMessageBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "NOT_ENOUGH_CREDITS: Free credits below the action price\n\nAI_CAP_REACHED: Hidden RM cap hit; show the same screen as NOT_ENOUGH_CREDITS without RM",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error_NOT_ENOUGH_CREDITS"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Error_AI_CAP_REACHED"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "LIMIT_REACHED: 10 changes, 5 sections, 5 images or the chat turns are used up",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_LIMIT_REACHED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "AGENT_OFFLINE: AI call failed or timed out. The client's message is saved, nothing is charged, the hold is released",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_AGENT_OFFLINE"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a message; one JSON reply from agent-ba with the side panel and turnsLeft",
+        "tags": [
+          "Chat and drafts"
+        ]
+      }
+    },
+    "/portal/requests/{id}/pause": {
+      "post": {
+        "description": "Screen 14",
+        "operationId": "ChatController_pause",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PauseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "\"Keep draft for 1 Nov\"; releases the hold",
+        "tags": [
+          "Chat and drafts"
+        ]
+      }
+    },
+    "/portal/requests/{id}/resume": {
+      "post": {
+        "description": "Screen 4",
+        "operationId": "ChatController_resume",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestReply"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "NOT_ENOUGH_CREDITS: Free credits below the action price",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_ENOUGH_CREDITS"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Back to chat; re-holds credits",
+        "tags": [
+          "Chat and drafts"
+        ]
+      }
+    },
+    "/portal/requests/{id}/drop": {
+      "post": {
+        "description": "Screens 4, 9",
+        "operationId": "ChatController_drop",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "A fresh UUID per user action. Retrying with the same key returns the first result.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{8,128}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Drop a draft. A started draft costs 15; without confirm the reply only shows the cost",
+        "tags": [
+          "Chat and drafts"
+        ]
+      }
+    },
+    "/portal/attachments": {
+      "post": {
+        "description": "Screens 6, 8",
+        "operationId": "ChatController_createAttachment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAttachmentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAttachmentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "LIMIT_REACHED: 10 changes, 5 sections, 5 images or the chat turns are used up",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_LIMIT_REACHED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Signed R2 upload URL and attachmentId",
+        "tags": [
+          "Chat and drafts"
+        ]
+      }
+    },
+    "/portal/attachments/{id}/url": {
+      "get": {
+        "description": "Screens 6–8",
+        "operationId": "ChatController_attachmentUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentUrlResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Signed view link, valid 5 min",
+        "tags": [
+          "Chat and drafts"
+        ]
+      }
+    },
+    "/portal/quotes": {
+      "post": {
+        "description": "Screen 6",
+        "operationId": "ChatController_createQuote",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuoteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateQuoteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "\"Something new\": straight to Chi’s queue, no AI",
+        "tags": [
+          "Chat and drafts"
+        ]
+      }
+    },
+    "/portal/requests/{id}/changes": {
+      "get": {
+        "description": "Screen 7",
+        "operationId": "ChangesController_changes",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change list old → new, \"3 of 10\", credits held",
+        "tags": [
+          "Change lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/review": {
+      "get": {
+        "description": "Screen 10",
+        "operationId": "ChangesController_review",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Each change: Now vs After, per language, page link",
+        "tags": [
+          "Change lane"
+        ]
+      },
+      "patch": {
+        "description": "Screen 10",
+        "operationId": "ChangesController_patchReview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchReviewBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "\"Update Malay too / English only\" per change",
+        "tags": [
+          "Change lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/approve": {
+      "post": {
+        "description": "Screen 10. A failed check releases the hold and the request goes On Hold.",
+        "operationId": "ChangesController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "A fresh UUID per user action. Retrying with the same key returns the first result.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{8,128}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestReply"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "NOT_ENOUGH_CREDITS: Free credits below the action price",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_ENOUGH_CREDITS"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request\n\nSTALE_PATCH: baseCommit or old text no longer matches; agent-ba rebuilds the patch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error_INVALID_STATE"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Error_STALE_PATCH"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Apply the patch and run checks; 20 credits charged on pass, then publish",
+        "tags": [
+          "Change lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/fix": {
+      "post": {
+        "description": "Screen 10",
+        "operationId": "ChangesController_fix",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FixBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestReply"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "LIMIT_REACHED: 10 changes, 5 sections, 5 images or the chat turns are used up",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_LIMIT_REACHED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "\"Ask agent-ba to fix\": back to chat with a note",
+        "tags": [
+          "Change lane"
+        ]
+      }
+    },
+    "/portal/layouts": {
+      "get": {
+        "description": "Screen 8",
+        "operationId": "NewPageController_layouts",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "5–6 layout thumbnails as block JSON",
+        "tags": [
+          "New page lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/layout-options": {
+      "post": {
+        "description": "Screen 8",
+        "operationId": "NewPageController_layoutOptions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LayoutOptionsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutOptionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "AI_CAP_REACHED: Hidden RM cap hit; show the same screen as NOT_ENOUGH_CREDITS without RM",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_AI_CAP_REACHED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "SKETCH_UNREADABLE: The sketch can't be mapped to blocks; offer the layouts instead",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_SKETCH_UNREADABLE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "AGENT_OFFLINE: AI call failed or timed out. The client's message is saved, nothing is charged, the hold is released",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_AGENT_OFFLINE"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "From a sketch or a thumbnail: up to 3 feedback points and 2–3 options. Free",
+        "tags": [
+          "New page lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/layout-options/{optionId}/pick": {
+      "post": {
+        "description": "Screen 8 → 9",
+        "operationId": "NewPageController_pick",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "optionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The option becomes the page plan",
+        "tags": [
+          "New page lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/plan": {
+      "get": {
+        "description": "Screen 9",
+        "operationId": "NewPageController_plan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Blocks, sectionsLeft, previewsUsed of 5",
+        "tags": [
+          "New page lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/previews": {
+      "post": {
+        "description": "Screen 9",
+        "operationId": "NewPageController_createPreview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "A fresh UUID per user action. Retrying with the same key returns the first result.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{8,128}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePreviewBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "NOT_ENOUGH_CREDITS: Free credits below the action price\n\nAI_CAP_REACHED: Hidden RM cap hit; show the same screen as NOT_ENOUGH_CREDITS without RM",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error_NOT_ENOUGH_CREDITS"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Error_AI_CAP_REACHED"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "AGENT_OFFLINE: AI call failed or timed out. The client's message is saved, nothing is charged, the hold is released",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_AGENT_OFFLINE"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Make the next preview. The 6th and later need confirm and cost 10",
+        "tags": [
+          "New page lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/previews/{n}": {
+      "get": {
+        "description": "Screen 9",
+        "operationId": "NewPageController_preview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "n",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Content JSON for the browser renderer",
+        "tags": [
+          "New page lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/sign-off": {
+      "get": {
+        "description": "Screen 11",
+        "operationId": "NewPageController_signOffSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignOffResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Summary, RM 100, 3 working days, terms text and version",
+        "tags": [
+          "New page lane"
+        ]
+      },
+      "post": {
+        "description": "Screen 11",
+        "operationId": "NewPageController_signOff",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "A fresh UUID per user action. Retrying with the same key returns the first result.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{8,128}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignOffBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestReply"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept terms and start the build (Jira ticket, dev run)",
+        "tags": [
+          "New page lane"
+        ]
+      }
+    },
+    "/portal/requests/{id}/uat": {
+      "get": {
+        "description": "Screen 12",
+        "operationId": "UatController_uat",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UatResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Preview URL, replyBy, freeRoundsLeft",
+        "tags": [
+          "Preview review (UAT)"
+        ]
+      }
+    },
+    "/portal/requests/{id}/uat/approve": {
+      "post": {
+        "description": "Screen 12",
+        "operationId": "UatController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "A fresh UUID per user action. Retrying with the same key returns the first result.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{8,128}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestReply"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Merge to main and go live",
+        "tags": [
+          "Preview review (UAT)"
+        ]
+      }
+    },
+    "/portal/requests/{id}/uat/feedback": {
+      "post": {
+        "description": "Screen 12",
+        "operationId": "UatController_feedback",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UatFeedbackBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestReply"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "LIMIT_REACHED: 10 changes, 5 sections, 5 images or the chat turns are used up",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_LIMIT_REACHED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send notes; uses the 1 free round",
+        "tags": [
+          "Preview review (UAT)"
+        ]
+      }
+    },
+    "/portal/credits": {
+      "get": {
+        "description": "Screen 5",
+        "operationId": "CreditsController_credits",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Both buckets, held, usage by type and month, price list",
+        "tags": [
+          "Credits and top-up"
+        ]
+      }
+    },
+    "/portal/credits/ledger": {
+      "get": {
+        "description": "Screen 5",
+        "operationId": "CreditsController_ledger",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LedgerResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "\"This month\" timeline (+200, −20, −15, 20 set aside)",
+        "tags": [
+          "Credits and top-up"
+        ]
+      }
+    },
+    "/portal/topups": {
+      "post": {
+        "description": "Screens 5, 14",
+        "operationId": "CreditsController_createTopup",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "A fresh UUID per user action. Retrying with the same key returns the first result.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{8,128}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTopupBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopupReply"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "WORKSPACE_READ_ONLY: Workspace overdue or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_WORKSPACE_READ_ONLY"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Request a top-up; reply carries DuitNow and bank details",
+        "tags": [
+          "Credits and top-up"
+        ]
+      },
+      "get": {
+        "description": "Screen 5",
+        "operationId": "CreditsController_topups",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopupList"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Top-ups, including any \"Waiting for payment\"",
+        "tags": [
+          "Credits and top-up"
+        ]
+      }
+    },
+    "/portal/topups/{id}/cancel": {
+      "post": {
+        "description": "Screen 5",
+        "operationId": "CreditsController_cancelTopup",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopupReply"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: Body, query or path fails the zod schema, or a required header is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_VALIDATION_FAILED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "TOKEN_EXPIRED: Access token missing, invalid or past its 15 min; refresh silently, then retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE: Action not allowed in this status (e.g. approve twice); refresh the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INVALID_STATE"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: Too many calls",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_RATE_LIMITED"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL: Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_INTERNAL"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel before Chi approves",
+        "tags": [
+          "Credits and top-up"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "foo-studio API",
+    "description": "Client portal contract (FS-85). JSON in and out, camelCase, UTC ISO times.\n\n- Auth: `Authorization: Bearer <access token>` from the auth service. The workspace always comes from the token’s client_id, never from the URL or body.\n- Errors: `{ code, message, details? }`; see the `Error_*` schemas.\n- Lists: `?cursor=…&limit=20`, reply has `nextCursor`.\n- Any POST that spends credits, publishes or grants needs an `Idempotency-Key` header.",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "https://api.studio.foocertong.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "ApproveBody": {
+        "type": "object",
+        "properties": {
+          "checkedText": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "checkedText"
+        ]
+      },
+      "AttachmentUrlResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Signed view link, valid 5 min"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "url",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "Block": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "hero, text, gallery, menu, contact, map, …"
+          },
+          "props": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "props"
+        ],
+        "additionalProperties": false
+      },
+      "Change": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "old": {
+            "type": "string"
+          },
+          "new": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "page",
+          "old",
+          "new"
+        ],
+        "additionalProperties": false
+      },
+      "ChangesResponse": {
+        "type": "object",
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Change"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "max": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "creditsHeld": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "changes",
+          "count",
+          "max",
+          "creditsHeld"
+        ],
+        "additionalProperties": false
+      },
+      "ChatMessage": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "client",
+              "ba",
+              "system"
+            ],
+            "description": "ba = agent-ba"
+          },
+          "content": {
+            "type": "string"
+          },
+          "attachmentIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "seq",
+          "role",
+          "content",
+          "attachmentIds",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "ChatPanel": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "changes"
+              },
+              "changes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Change"
+                }
+              },
+              "count": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "max": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "creditsHeld": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "canReview": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "kind",
+              "changes",
+              "count",
+              "max",
+              "creditsHeld",
+              "canReview"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "page_plan"
+              },
+              "plan": {
+                "$ref": "#/components/schemas/PagePlan"
+              }
+            },
+            "required": [
+              "kind",
+              "plan"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "CloseReason": {
+        "type": "string",
+        "enum": [
+          "client_cancelled",
+          "no_reply",
+          "agent_closed"
+        ]
+      },
+      "CreateAttachmentBody": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "screenshot",
+              "sketch"
+            ]
+          },
+          "mime": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp"
+            ]
+          },
+          "bytes": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 10485760
+          }
+        },
+        "required": [
+          "requestId",
+          "purpose",
+          "mime",
+          "bytes"
+        ]
+      },
+      "CreateAttachmentResponse": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "uploadUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Signed R2 PUT URL"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "attachmentId",
+          "uploadUrl",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "CreatePreviewBody": {
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      },
+      "CreatePreviewResponse": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "boolean"
+          },
+          "previewNo": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cost": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "created",
+          "previewNo",
+          "cost"
+        ],
+        "additionalProperties": false
+      },
+      "CreateQuoteBody": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "attachmentIds": {
+            "default": [],
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "CreateQuoteResponse": {
+        "type": "object",
+        "properties": {
+          "quoteId": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "quoteId",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "CreateRequestBody": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/RequestType"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "CreateRequestResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/RequestCard"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ChatMessage"
+          }
+        },
+        "required": [
+          "request",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "CreateTopupBody": {
+        "type": "object",
+        "properties": {
+          "pack": {
+            "type": "number",
+            "const": 100
+          }
+        },
+        "required": [
+          "pack"
+        ]
+      },
+      "CreditAction": {
+        "type": "string",
+        "enum": [
+          "change",
+          "drop",
+          "extra_preview"
+        ]
+      },
+      "CreditsBlock": {
+        "type": "object",
+        "properties": {
+          "free": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "monthly.free + topup.free"
+          },
+          "monthly": {
+            "type": "object",
+            "properties": {
+              "free": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "grant": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Granted on the 1st (200)"
+              },
+              "used": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "resetOn": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              }
+            },
+            "required": [
+              "free",
+              "grant",
+              "used",
+              "resetOn"
+            ],
+            "additionalProperties": false
+          },
+          "topup": {
+            "type": "object",
+            "properties": {
+              "free": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "neverExpires": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "free",
+              "neverExpires"
+            ],
+            "additionalProperties": false
+          },
+          "held": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "heldFor": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "requestId": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "credits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "requestId",
+                "credits"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "free",
+          "monthly",
+          "topup",
+          "held",
+          "heldFor"
+        ],
+        "additionalProperties": false
+      },
+      "CreditsResponse": {
+        "type": "object",
+        "properties": {
+          "free": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "monthly.free + topup.free"
+          },
+          "monthly": {
+            "type": "object",
+            "properties": {
+              "free": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "grant": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Granted on the 1st (200)"
+              },
+              "used": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "resetOn": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              }
+            },
+            "required": [
+              "free",
+              "grant",
+              "used",
+              "resetOn"
+            ],
+            "additionalProperties": false
+          },
+          "topup": {
+            "type": "object",
+            "properties": {
+              "free": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "neverExpires": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "free",
+              "neverExpires"
+            ],
+            "additionalProperties": false
+          },
+          "held": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "heldFor": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "requestId": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "credits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "requestId",
+                "credits"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "usageByType": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "$ref": "#/components/schemas/CreditAction"
+                },
+                "credits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "action",
+                "credits"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "usageByMonth": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "month": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                "used": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "month",
+                "used"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Last 4 months"
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "$ref": "#/components/schemas/CreditAction"
+                },
+                "credits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "action",
+                "credits"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "topupPacks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "credits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "priceRm": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "credits",
+                "priceRm"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "free",
+          "monthly",
+          "topup",
+          "held",
+          "heldFor",
+          "usageByType",
+          "usageByMonth",
+          "prices",
+          "topupPacks"
+        ],
+        "additionalProperties": false
+      },
+      "DropBody": {
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      },
+      "DropResponse": {
+        "type": "object",
+        "properties": {
+          "dropped": {
+            "type": "boolean"
+          },
+          "cost": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "15 once the draft has started, else 0"
+          },
+          "request": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequestCard"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null when not dropped"
+          }
+        },
+        "required": [
+          "dropped",
+          "cost",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "Error_AGENT_OFFLINE": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "AGENT_OFFLINE"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "messageSeq": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "retryAfter": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Seconds"
+              }
+            },
+            "required": [
+              "messageSeq",
+              "retryAfter"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
+        "additionalProperties": false
+      },
+      "Error_AI_CAP_REACHED": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "AI_CAP_REACHED"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "resetOn": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              }
+            },
+            "required": [
+              "resetOn"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
+        "additionalProperties": false
+      },
+      "Error_INTERNAL": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "INTERNAL"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "Error_INVALID_STATE": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "INVALID_STATE"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "Error_LIMIT_REACHED": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "LIMIT_REACHED"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "string",
+                "enum": [
+                  "changes",
+                  "sections",
+                  "images",
+                  "chat_turns"
+                ]
+              },
+              "max": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "limit",
+              "max"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
+        "additionalProperties": false
+      },
+      "Error_NOT_ENOUGH_CREDITS": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "NOT_ENOUGH_CREDITS"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "needed": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "have": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "short": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "resetOn": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              "draftId": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "needed",
+              "have",
+              "short",
+              "resetOn",
+              "draftId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
+        "additionalProperties": false
+      },
+      "Error_NOT_FOUND": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "NOT_FOUND"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "Error_RATE_LIMITED": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "RATE_LIMITED"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "retryAfter": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Seconds"
+              }
+            },
+            "required": [
+              "retryAfter"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
+        "additionalProperties": false
+      },
+      "Error_SKETCH_UNREADABLE": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "SKETCH_UNREADABLE"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "Error_STALE_PATCH": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "STALE_PATCH"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "Error_TOKEN_EXPIRED": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "TOKEN_EXPIRED"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "Error_VALIDATION_FAILED": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "VALIDATION_FAILED"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "path",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "fields"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
+        "additionalProperties": false
+      },
+      "Error_WORKSPACE_READ_ONLY": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "const": "WORKSPACE_READ_ONLY"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "FixBody": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "note"
+        ]
+      },
+      "HomeResponse": {
+        "type": "object",
+        "properties": {
+          "focus": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "$ref": "#/components/schemas/RequestAction"
+                  },
+                  "requestId": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "action",
+                  "requestId",
+                  "title"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The one thing to do next; null when nothing is waiting"
+          },
+          "waitingForYou": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequestCard"
+            }
+          },
+          "creditsByMonth": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "month": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                },
+                "used": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "month",
+                "used"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Last 4 months"
+          },
+          "monthlyGrant": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The 200 line on the chart"
+          }
+        },
+        "required": [
+          "focus",
+          "waitingForYou",
+          "creditsByMonth",
+          "monthlyGrant"
+        ],
+        "additionalProperties": false
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "en",
+          "ms",
+          "zh"
+        ],
+        "description": "EN, BM, CN"
+      },
+      "Layout": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "thumbnailId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "blocks"
+        ],
+        "additionalProperties": false
+      },
+      "LayoutOptionsBody": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "description": "An uploaded sketch",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "thumbnailId": {
+            "description": "A layout from GET /portal/layouts",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "LayoutOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "feedback": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "string"
+            }
+          },
+          "options": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "blocks": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Block"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "blocks"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "feedback",
+          "options"
+        ],
+        "additionalProperties": false
+      },
+      "LayoutsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Layout"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "LedgerKind": {
+        "type": "string",
+        "enum": [
+          "grant",
+          "charge",
+          "hold",
+          "release",
+          "topup",
+          "adjust",
+          "expire"
+        ]
+      },
+      "LedgerResponse": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "kind": {
+                  "$ref": "#/components/schemas/LedgerKind"
+                },
+                "credits": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "Signed: + adds, − spends; a hold shows the amount set aside"
+                },
+                "bucket": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "grant",
+                        "topup"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "null for holds and releases"
+                },
+                "requestId": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "at",
+                "kind",
+                "credits",
+                "bucket",
+                "requestId",
+                "label"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "month",
+          "entries"
+        ],
+        "additionalProperties": false
+      },
+      "ListRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequestCard"
+            }
+          },
+          "nextCursor": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "active": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "live": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "all": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "active",
+              "live",
+              "all"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "MeResponse": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+              }
+            },
+            "required": [
+              "name",
+              "email"
+            ],
+            "additionalProperties": false
+          },
+          "workspace": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "read_only",
+                  "deactivated"
+                ]
+              },
+              "site": {
+                "type": "string",
+                "description": "Site domain, e.g. kopilane.com"
+              }
+            },
+            "required": [
+              "name",
+              "status",
+              "site"
+            ],
+            "additionalProperties": false
+          },
+          "credits": {
+            "$ref": "#/components/schemas/CreditsBlock"
+          }
+        },
+        "required": [
+          "account",
+          "workspace",
+          "credits"
+        ],
+        "examples": [
+          {
+            "account": {
+              "name": "Mei Ling",
+              "email": "hello@kopilane.com"
+            },
+            "workspace": {
+              "name": "Kopi Lane",
+              "status": "active",
+              "site": "kopilane.com"
+            },
+            "credits": {
+              "free": 125,
+              "monthly": {
+                "free": 125,
+                "grant": 200,
+                "used": 55,
+                "resetOn": "2026-11-01"
+              },
+              "topup": {
+                "free": 0,
+                "neverExpires": true
+              },
+              "held": 20,
+              "heldFor": [
+                {
+                  "requestId": 43,
+                  "credits": 20
+                }
+              ]
+            }
+          }
+        ],
+        "additionalProperties": false
+      },
+      "MessagesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "description": "Newest first"
+          },
+          "nextBefore": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextBefore"
+        ],
+        "additionalProperties": false
+      },
+      "Owner": {
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "client",
+              "agent"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "PagePlan": {
+        "type": "object",
+        "properties": {
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            }
+          },
+          "sectionsLeft": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "previewsUsed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "freePreviews": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "5"
+          }
+        },
+        "required": [
+          "blocks",
+          "sectionsLeft",
+          "previewsUsed",
+          "freePreviews"
+        ],
+        "additionalProperties": false
+      },
+      "PatchReviewBody": {
+        "type": "object",
+        "properties": {
+          "changes": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "englishOnly": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "englishOnly"
+              ]
+            }
+          }
+        },
+        "required": [
+          "changes"
+        ]
+      },
+      "PauseResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/RequestCard"
+          },
+          "keptUntil": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "creditsReleased": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "request",
+          "keptUntil",
+          "creditsReleased"
+        ],
+        "additionalProperties": false
+      },
+      "PlanResponse": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/PagePlan"
+          }
+        },
+        "required": [
+          "plan"
+        ],
+        "additionalProperties": false
+      },
+      "PostMessageBody": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "attachmentIds": {
+            "default": [],
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "PostMessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ChatMessage"
+          },
+          "panel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatPanel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "turnsLeft": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "message",
+          "panel",
+          "turnsLeft"
+        ],
+        "examples": [
+          {
+            "message": {
+              "seq": 7,
+              "role": "ba",
+              "content": "Got it. Hours on Home and Visit us both change.",
+              "attachmentIds": [],
+              "createdAt": "2026-10-15T06:09:00.000Z"
+            },
+            "panel": {
+              "kind": "changes",
+              "changes": [
+                {
+                  "id": "c1",
+                  "page": "Home",
+                  "old": "8am–6pm daily",
+                  "new": "7am–7pm, closed Tuesdays"
+                }
+              ],
+              "count": 3,
+              "max": 10,
+              "creditsHeld": 20,
+              "canReview": true
+            },
+            "turnsLeft": 9
+          }
+        ],
+        "additionalProperties": false
+      },
+      "PreviewResponse": {
+        "type": "object",
+        "properties": {
+          "previewNo": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Block"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "previewNo",
+          "blocks",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "RequestAction": {
+        "type": "string",
+        "enum": [
+          "open_chat",
+          "pause",
+          "resume",
+          "drop",
+          "review",
+          "approve",
+          "fix",
+          "pick_layout",
+          "make_preview",
+          "sign_off",
+          "uat_approve",
+          "uat_feedback"
+        ]
+      },
+      "RequestCard": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/RequestStatus"
+          },
+          "closeReason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CloseReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statusKey": {
+            "$ref": "#/components/schemas/StatusKey"
+          },
+          "badge": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/Owner"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            }
+          },
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "type": {
+            "$ref": "#/components/schemas/RequestType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "replyBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set while it is the client’s turn"
+          },
+          "creditsHeld": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "status",
+          "closeReason",
+          "statusKey",
+          "badge",
+          "owner",
+          "steps",
+          "id",
+          "type",
+          "title",
+          "replyBy",
+          "creditsHeld",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "RequestDetail": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/RequestStatus"
+          },
+          "closeReason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CloseReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statusKey": {
+            "$ref": "#/components/schemas/StatusKey"
+          },
+          "badge": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/Owner"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            }
+          },
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "type": {
+            "$ref": "#/components/schemas/RequestType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "replyBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set while it is the client’s turn"
+          },
+          "creditsHeld": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "at",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Dated, from request_event"
+          },
+          "signedOff": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                  },
+                  "what": {
+                    "type": "string"
+                  },
+                  "termsVersion": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "at",
+                  "what",
+                  "termsVersion"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nextStep": {
+            "description": "Shown on every closed or held request",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequestAction"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "closeReason",
+          "statusKey",
+          "badge",
+          "owner",
+          "steps",
+          "id",
+          "type",
+          "title",
+          "replyBy",
+          "creditsHeld",
+          "updatedAt",
+          "timeline",
+          "signedOff",
+          "nextStep",
+          "actions"
+        ],
+        "additionalProperties": false
+      },
+      "RequestReply": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/RequestCard"
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "RequestsSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "changesDone": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pagesLive": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "changesDone",
+          "pagesLive"
+        ],
+        "additionalProperties": false
+      },
+      "RequestStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "paused",
+          "submitted",
+          "building",
+          "checking",
+          "uat",
+          "live",
+          "pending_chi",
+          "closed"
+        ]
+      },
+      "RequestTab": {
+        "type": "string",
+        "enum": [
+          "active",
+          "live",
+          "all"
+        ]
+      },
+      "RequestType": {
+        "type": "string",
+        "enum": [
+          "change",
+          "new_page"
+        ]
+      },
+      "ReviewChange": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "pageUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "englishOnly": {
+            "type": "boolean"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "$ref": "#/components/schemas/Language"
+                },
+                "now": {
+                  "type": "string"
+                },
+                "after": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "language",
+                "now",
+                "after"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "page",
+          "pageUrl",
+          "englishOnly",
+          "languages"
+        ],
+        "additionalProperties": false
+      },
+      "ReviewResponse": {
+        "type": "object",
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewChange"
+            }
+          },
+          "creditsOnApprove": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "changes",
+          "creditsOnApprove"
+        ],
+        "additionalProperties": false
+      },
+      "SignOffBody": {
+        "type": "object",
+        "properties": {
+          "acceptTerms": {
+            "type": "boolean",
+            "const": true
+          },
+          "termsVersion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "previewNo": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "acceptTerms",
+          "termsVersion",
+          "previewNo"
+        ]
+      },
+      "SignOffResponse": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "priceRm": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "100"
+          },
+          "workingDays": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "3"
+          },
+          "readyBy": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "terms": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "version",
+              "text"
+            ],
+            "additionalProperties": false
+          },
+          "previewNo": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "summary",
+          "priceRm",
+          "workingDays",
+          "readyBy",
+          "terms",
+          "previewNo"
+        ],
+        "additionalProperties": false
+      },
+      "StatusKey": {
+        "type": "string",
+        "enum": [
+          "Draft-You",
+          "Building-Agent",
+          "Checking-Agent",
+          "Ready-to-Check-You",
+          "Live",
+          "On-Hold",
+          "Cancelled-You",
+          "Closed-No-Reply",
+          "Closed-Agent"
+        ]
+      },
+      "Step": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/StepKey"
+          },
+          "label": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/StepState"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "StepKey": {
+        "type": "string",
+        "enum": [
+          "plan",
+          "build",
+          "check",
+          "ready_to_check",
+          "live"
+        ]
+      },
+      "StepState": {
+        "type": "string",
+        "enum": [
+          "done",
+          "now",
+          "your_turn",
+          "problem",
+          "todo"
+        ]
+      },
+      "Topup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "status": {
+            "$ref": "#/components/schemas/TopupStatus"
+          },
+          "badge": {
+            "type": "string",
+            "description": "From mapTopupBadge(); requested → \"Waiting for payment\""
+          },
+          "credits": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "priceRm": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "payment": {
+            "type": "object",
+            "properties": {
+              "reference": {
+                "type": "string",
+                "description": "Put this in the transfer note"
+              },
+              "duitNow": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "additionalProperties": false
+              },
+              "bank": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "accountName": {
+                    "type": "string"
+                  },
+                  "accountNo": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "accountName",
+                  "accountNo"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "reference",
+              "duitNow",
+              "bank"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "badge",
+          "credits",
+          "priceRm",
+          "createdAt",
+          "payment"
+        ],
+        "additionalProperties": false
+      },
+      "TopupList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Topup"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "TopupReply": {
+        "type": "object",
+        "properties": {
+          "topup": {
+            "$ref": "#/components/schemas/Topup"
+          }
+        },
+        "required": [
+          "topup"
+        ],
+        "additionalProperties": false
+      },
+      "TopupStatus": {
+        "type": "string",
+        "enum": [
+          "requested",
+          "approved",
+          "cancelled"
+        ]
+      },
+      "UatFeedbackBody": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "notes"
+        ]
+      },
+      "UatResponse": {
+        "type": "object",
+        "properties": {
+          "previewUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "replyBy": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "freeRoundsLeft": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "previewUrl",
+          "replyBy",
+          "freeRoundsLeft"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}
