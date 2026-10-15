@@ -29,7 +29,13 @@ export default defineConfig({
     root: './',
     include: ['test/db/**/*.int-spec.ts'],
     // Spread: an undefined value would arrive as the string "undefined".
-    env: { TZ: 'UTC', ...(TEST_DATABASE_URL ? { TEST_DATABASE_URL } : {}) },
+    env: {
+      TZ: 'UTC',
+      STUDIO_WEB_ORIGINS: 'http://localhost:5182',
+      AUTH_ISSUER: 'http://auth.test',
+      AUTH_JWKS_URL: 'http://auth.test/.well-known/jwks.json',
+      ...(TEST_DATABASE_URL ? { TEST_DATABASE_URL } : {}),
+    },
     fileParallelism: false,
     testTimeout: 30_000,
     hookTimeout: 120_000,

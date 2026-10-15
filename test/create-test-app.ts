@@ -1,21 +1,24 @@
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import type { NextFunction, Request, Response } from 'express';
 import { configureApp } from '../src/app-setup';
 import { AppModule } from '../src/app.module';
+import { JWKS } from '../src/auth/jwks.provider';
+import { PrismaService } from '../src/prisma/prisma.service';
+import { testJwks } from './auth-tokens';
 
-/** Header a test sets to act as a signed-in client; stands in for the FS-86 JWKS guard. */
-export const TEST_CLIENT_HEADER = 'x-test-client-id';
-
-export async function createTestApp(): Promise<INestApplication> {
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+/**
+ * The app as main.ts wires it (configureApp), with nest-foo-auth's key set
+ * swapped for a local one: tests send real ES256 tokens (test/auth-tokens.ts)
+ * through the real guard. Pass a PrismaService to run against a database.
+ */
+export async function createTestApp(options: { prisma?: PrismaService } = {}): Promise<INestApplication> {
+  let builder = Test.createTestingModule({ imports: [AppModule] })
+    .overrideProvider(JWKS)
+    .useValue(await testJwks());
+  if (options.prisma) builder = builder.overrideProvider(PrismaService).useValue(options.prisma);
+  const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication({ logger: false });
   configureApp(app);
-  app.use((req: Request & { user?: unknown }, _res: Response, next: NextFunction) => {
-    const clientId = req.header(TEST_CLIENT_HEADER);
-    if (clientId) req.user = { accountType: 'client', clientId: Number(clientId) };
-    next();
-  });
   await app.init();
   return app;
 }

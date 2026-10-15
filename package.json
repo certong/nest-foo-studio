@@ -28,6 +28,7 @@
     "@nestjs/platform-express": "11.2.1",
     "@nestjs/swagger": "11.4.7",
     "@prisma/client": "6.19.3",
+    "jose": "6.2.10",
     "nestjs-zod": "5.5.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
