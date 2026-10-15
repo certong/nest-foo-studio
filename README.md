@@ -5,7 +5,8 @@ Studio's backend: the client portal API (`/portal`), plus admin, internal and li
 ## Status
 
 - **Contract (FS-85):** all 35 `/portal` routes exist, with their real paths, request/response schemas and error replies. Each handler answers `501 NOT_IMPLEMENTED` with `details.ticket` naming the ticket that builds it (FS-86…FS-103).
-- **Database (FS-33):** schema `studio`, 18 tables, roles and the Kopi Lane seed. No route reads it yet.
+- **Database (FS-33):** schema `studio`, 18 tables, roles and the Kopi Lane seed.
+- **Live routes:** `GET /portal/me` (FS-86). Every `/portal` route checks nest-foo-auth's access token: ES256, `aud=studio`, a client account with its `client_id`. Anything else gets 401 `TOKEN_EXPIRED`.
 
 ## For the frontend
 
