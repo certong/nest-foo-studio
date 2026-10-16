@@ -4,6 +4,7 @@ import { ZodResponse } from 'nestjs-zod';
 import { ApiErrors } from '../common/api-errors.decorator';
 import { CurrentWorkspace, type WorkspaceScope } from '../common/current-workspace.decorator';
 import { notImplemented } from '../common/studio-exception';
+import { MeService } from './me/me.service';
 import {
   CreateRequestBody,
   CreateRequestResponse,
@@ -19,12 +20,17 @@ import { PortalController } from './portal-controller.decorator';
 
 @PortalController('', 'Home, requests and progress')
 export class RequestsController {
+  constructor(private readonly meService: MeService) {}
+
   @Get('me')
-  @ApiOperation({ summary: 'Account, workspace, site domain, status, credit meter', description: 'Screen 3, nav' })
+  @ApiOperation({
+    summary: 'Account, workspace, site domain, status, credit meter',
+    description: 'Screen 3, nav. Called on every page: served from a 60 s per-workspace cache.',
+  })
   @ZodResponse({ type: MeResponse })
-  @ApiErrors()
-  me(@CurrentWorkspace() _ws: WorkspaceScope) {
-    return notImplemented('FS-86');
+  @ApiErrors('NOT_FOUND')
+  me(@CurrentWorkspace() ws: WorkspaceScope) {
+    return this.meService.me(ws);
   }
 
   @Get('home')

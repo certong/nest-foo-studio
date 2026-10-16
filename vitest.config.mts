@@ -15,7 +15,13 @@ export default defineConfig({
     // otherwise time-based behaviour (reset dates, reply-by) can
     // pass on a developer's machine in +07 and fail in the container.
     // STUDIO_WEB_ORIGINS: configureApp() refuses to start without an allowlist.
-    env: { TZ: 'UTC', STUDIO_WEB_ORIGINS: 'http://localhost:5182' },
+    // configureApp() refuses to start without these; the JWKS itself is swapped for a local one.
+    env: {
+      TZ: 'UTC',
+      STUDIO_WEB_ORIGINS: 'http://localhost:5182',
+      AUTH_ISSUER: 'http://auth.test',
+      AUTH_JWKS_URL: 'http://auth.test/.well-known/jwks.json',
+    },
   },
   plugins: [
     // Nest resolves constructor dependencies from `emitDecoratorMetadata`, which

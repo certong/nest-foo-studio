@@ -3,7 +3,7 @@
   "paths": {
     "/portal/me": {
       "get": {
-        "description": "Screen 3, nav",
+        "description": "Screen 3, nav. Called on every page: served from a 60 s per-workspace cache.",
         "operationId": "RequestsController_me",
         "parameters": [],
         "responses": {
@@ -23,6 +23,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error_TOKEN_EXPIRED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: Wrong id, or another client's id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error_NOT_FOUND"
                 }
               }
             }
