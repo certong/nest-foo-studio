@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CreditsService } from './credits.service';
 import { WorkspaceCache } from './workspace-cache';
 
 /**
@@ -6,7 +7,7 @@ import { WorkspaceCache } from './workspace-cache';
  * has to invalidate; the portal reads through it.
  */
 @Module({
-  providers: [WorkspaceCache],
-  exports: [WorkspaceCache],
+  providers: [CreditsService, WorkspaceCache],
+  exports: [CreditsService, WorkspaceCache],
 })
 export class CreditsModule {}
