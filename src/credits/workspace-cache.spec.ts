@@ -38,4 +38,14 @@ describe('WorkspaceCache', () => {
     await expect(cache.get(9001, () => Promise.reject(new Error('down')))).rejects.toThrow('down');
     expect(await cache.get(9001, load)).toBe('v1');
   });
+
+  it('a load that began before invalidate() is not kept: the next call reads fresh', async () => {
+    let finish!: (value: string) => void;
+    const slow = new Promise<string>((resolve) => (finish = resolve));
+    const inFlight = cache.get(9001, () => slow); // SELECT ran before a credit write committed…
+    cache.invalidate(9001); // …which invalidated after its commit…
+    finish('stale');
+    expect(await inFlight).toBe('stale'); // …so this caller sees the old balances once, fine,
+    expect(await cache.get(9001, load)).toBe('v1'); // but nobody else does for the next 60 s.
+  });
 });

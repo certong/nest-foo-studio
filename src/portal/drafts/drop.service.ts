@@ -26,7 +26,12 @@ export function hasStarted(facts: DraftFacts): boolean {
   );
 }
 
-const DROPPABLE: ReadonlySet<string> = new Set<ActiveStatus>(['draft', 'paused']);
+const DROPPABLE = ['draft', 'paused'] as const satisfies readonly ActiveStatus[];
+type Droppable = (typeof DROPPABLE)[number];
+
+function isDroppable(status: string): status is Droppable {
+  return (DROPPABLE as readonly string[]).includes(status);
+}
 
 /**
  * POST /portal/requests/:id/drop (screens 4, 9). Without `confirm` it only
@@ -42,7 +47,7 @@ export class DropService {
 
   async drop(ws: WorkspaceScope, requestId: string, body: z.infer<typeof DropBody>): Promise<Drop> {
     const row = await this.prisma.request.findFirst({
-      where: { id: requestId, workspaceId: ws.clientId },
+      where: { id: requestId, workspaceId: ws.clientId, workspace: { deletedAt: null } },
       include: {
         workspace: { select: { status: true } },
         _count: { select: { messages: { where: { role: 'ba', seq: { gt: 1 } } } } },
@@ -50,10 +55,8 @@ export class DropService {
     });
     if (!row) throw new StudioException('NOT_FOUND');
     if (row.workspace.status !== 'active') throw new StudioException('WORKSPACE_READ_ONLY');
-    if (!DROPPABLE.has(row.status)) {
-      throw new StudioException('INVALID_STATE', undefined, 'Only a draft can be dropped');
-    }
-    const previous = row.status as ActiveStatus;
+    if (!isDroppable(row.status)) throw new StudioException('INVALID_STATE', undefined, 'Only a draft can be dropped');
+    const previous = row.status;
 
     const started = hasStarted({
       creditsHeld: row.creditsHeld,
@@ -68,10 +71,14 @@ export class DropService {
     const request = await this.credits.run(ws.clientId, async (tx) => {
       if (cost > 0) await this.credits.charge(tx, scope, 'drop');
       else await this.credits.release(tx, scope);
-      const closed = await tx.request.update({
-        where: { id: requestId },
+      // The status rule, applied under the lock: if the draft moved on since
+      // the read above, nothing matches and the whole transaction rolls back.
+      const { count } = await tx.request.updateMany({
+        where: { id: requestId, workspaceId: ws.clientId, status: previous },
         data: { status: 'closed', closeReason: 'client_cancelled' },
       });
+      if (count !== 1) throw new StudioException('INVALID_STATE', undefined, 'The draft changed; refresh and try again');
+      const closed = await tx.request.findUniqueOrThrow({ where: { id: requestId } });
       await tx.requestEvent.create({
         data: { requestId, workspaceId: ws.clientId, fromStatus: previous, toStatus: 'closed', actorAccountId: ws.accountId },
       });

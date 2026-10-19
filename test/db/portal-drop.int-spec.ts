@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { seed } from '../../prisma/seed';
 import { DropResponse } from '../../src/contract/chat';
+import { CreditsService } from '../../src/credits/credits.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { bearer } from '../auth-tokens';
 import { createTestApp } from '../create-test-app';
@@ -160,5 +161,38 @@ describe.skipIf(!HAS_DATABASE)('POST /portal/requests/:id/drop (FS-92)', () => {
     const after = await me();
     expect(after.credits.held).toBe(20);
     expect(after.credits.heldFor.map((h: { requestNumber: number }) => h.requestNumber)).toEqual([43]);
+  });
+
+  it('a cost preview on a soft-deleted workspace is 404, like everything else', async () => {
+    await createWorkspace(db.prisma, 9205, { grantBalance: 100, topupBalance: 0 });
+    const draft = await heldDraft(9205, 1);
+    await db.prisma.workspace.update({ where: { id: 9205 }, data: { deletedAt: new Date() } });
+
+    const res = await drop(9205, draft, {}, 404);
+
+    expect(res.body.code).toBe('NOT_FOUND');
+  });
+
+  it('a draft that moved on between the preview and the confirm is not closed, and nothing is charged', async () => {
+    await createWorkspace(db.prisma, 9206, { grantBalance: 100, topupBalance: 0 });
+    const draft = await heldDraft(9206, 1);
+    // Another transition commits after drop's pre-read and before its transaction locks the row.
+    const credits = app.get(CreditsService);
+    const realCharge = credits.charge.bind(credits);
+    const charge = vi.spyOn(credits, 'charge').mockImplementationOnce(async (tx, scope, action) => {
+      await db.prisma.request.update({ where: { id: draft }, data: { status: 'submitted' } });
+      return realCharge(tx, scope, action);
+    });
+    try {
+      const res = await drop(9206, draft, { confirm: true }, 409);
+
+      expect(res.body.code).toBe('INVALID_STATE');
+      expect(charge).toHaveBeenCalledTimes(1);
+      expect(await db.prisma.request.findUniqueOrThrow({ where: { id: draft } })).toMatchObject({ status: 'submitted', creditsHeld: 20 });
+      expect(await ledgerFor(draft)).toEqual([]);
+      expect(await workspace(9206)).toEqual({ grantBalance: 100, topupBalance: 0, creditsHeld: 20 });
+    } finally {
+      charge.mockRestore();
+    }
   });
 });
