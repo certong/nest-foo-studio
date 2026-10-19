@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { CreditsModule } from '../credits/credits.module';
+import { DropService } from './drafts/drop.service';
 import { ChangesController } from './changes.controller';
 import { ChatController } from './chat.controller';
 import { CreditsController } from './credits.controller';
@@ -17,6 +18,6 @@ import { UatController } from './uat.controller';
 @Module({
   imports: [AuthModule, CreditsModule],
   controllers: [RequestsController, ChatController, ChangesController, NewPageController, UatController, CreditsController],
-  providers: [MeService],
+  providers: [MeService, DropService],
 })
 export class PortalModule {}

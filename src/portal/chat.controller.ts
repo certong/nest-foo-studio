@@ -21,10 +21,13 @@ import {
   PostMessageResponse,
   RequestReply,
 } from './dto';
+import { DropService } from './drafts/drop.service';
 import { PortalController } from './portal-controller.decorator';
 
 @PortalController('', 'Chat and drafts')
 export class ChatController {
+  constructor(private readonly dropService: DropService) {}
+
   @Get('requests/:id/messages')
   @ApiOperation({ summary: 'One request’s chat, newest first, paged by seq', description: 'Screens 6–9' })
   @ZodResponse({ type: MessagesResponse })
@@ -67,9 +70,9 @@ export class ChatController {
     description: 'Screens 4, 9',
   })
   @ZodResponse({ status: 200, type: DropResponse })
-  @ApiErrors('NOT_FOUND', 'INVALID_STATE', 'WORKSPACE_READ_ONLY')
-  drop(@CurrentWorkspace() _ws: WorkspaceScope, @Param() _params: IdParam, @Body() _body: DropBody) {
-    return notImplemented('FS-92');
+  @ApiErrors('NOT_FOUND', 'INVALID_STATE', 'NOT_ENOUGH_CREDITS', 'WORKSPACE_READ_ONLY')
+  drop(@CurrentWorkspace() ws: WorkspaceScope, @Param() params: IdParam, @Body() body: DropBody) {
+    return this.dropService.drop(ws, params.id, body);
   }
 
   @Post('attachments')
