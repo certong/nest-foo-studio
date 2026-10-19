@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { CreditAction as CreditActionSchema } from '../contract/credits';
 import { nextResetOn } from '../portal/me/credit-meter';
 import { readPrices } from './prices';
-import { availableCredits, type Balances } from './split';
+import { availableCredits, splitCharge, type Balances } from './split';
 import { WorkspaceCache } from './workspace-cache';
 
 export type Tx = Prisma.TransactionClient;
@@ -110,12 +110,57 @@ export class CreditsService {
     return { price, held: price };
   }
 
-  async charge(_tx: Tx, _scope: CreditScope, _action: CreditAction): Promise<ChargeResult> {
-    throw new Error('Task 5');
+  /**
+   * Take the action's price out of the buckets, monthly first, and drop this
+   * request's hold. Idempotent on `usage:<requestId>:<action>`: a retry
+   * returns what the ledger already recorded and writes nothing.
+   */
+  async charge(tx: Tx, scope: CreditScope, action: CreditAction): Promise<ChargeResult> {
+    const { workspace, request } = await this.lock(tx, scope);
+    const key = usageKey(scope.requestId, action);
+
+    const recorded = await tx.creditLedger.findMany({
+      where: { workspaceId: scope.workspaceId, idemKey: { in: [key, `${key}:topup`] } },
+      select: { bucket: true, credits: true },
+    });
+    if (recorded.length > 0) {
+      const spent = (bucket: 'grant' | 'topup') => -recorded.filter((r) => r.bucket === bucket).reduce((sum, r) => sum + r.credits, 0);
+      const fromGrant = spent('grant');
+      const fromTopup = spent('topup');
+      return { price: fromGrant + fromTopup, fromGrant, fromTopup, alreadyCharged: true };
+    }
+
+    const price = await this.price(tx, action);
+    // The request's own hold is released by this charge, so it does not count against it.
+    this.ensureAvailable(workspace, request.creditsHeld, price, scope.requestId);
+    const { fromGrant, fromTopup } = splitCharge(workspace.grantBalance, price);
+
+    const rows: Array<Pick<Prisma.CreditLedgerCreateManyInput, 'bucket' | 'credits' | 'idemKey'>> = [];
+    if (fromGrant > 0) rows.push({ bucket: 'grant', credits: -fromGrant, idemKey: key });
+    if (fromTopup > 0) rows.push({ bucket: 'topup', credits: -fromTopup, idemKey: fromGrant > 0 ? `${key}:topup` : key });
+    await tx.creditLedger.createMany({
+      data: rows.map((row) => ({ ...row, workspaceId: scope.workspaceId, kind: 'usage', requestId: request.id, createdBy: scope.actor })),
+    });
+    await tx.workspace.update({
+      where: { id: workspace.id },
+      data: {
+        grantBalance: { decrement: fromGrant },
+        topupBalance: { decrement: fromTopup },
+        creditsHeld: { decrement: request.creditsHeld },
+      },
+    });
+    await tx.request.update({ where: { id: request.id }, data: { creditsHeld: 0, creditsPrice: price } });
+    return { price, fromGrant, fromTopup, alreadyCharged: false };
   }
 
-  async release(_tx: Tx, _scope: CreditScope): Promise<ReleaseResult> {
-    throw new Error('Task 5');
+  /** Drop the request's hold. Nothing goes to the ledger; no hold is a no-op. */
+  async release(tx: Tx, scope: CreditScope): Promise<ReleaseResult> {
+    const { workspace, request } = await this.lock(tx, scope);
+    const released = request.creditsHeld;
+    if (released === 0) return { released };
+    await tx.request.update({ where: { id: request.id }, data: { creditsHeld: 0 } });
+    await tx.workspace.update({ where: { id: workspace.id }, data: { creditsHeld: { decrement: released } } });
+    return { released };
   }
 
   /** 402 when the price is not covered once this request's own hold is set aside. */
