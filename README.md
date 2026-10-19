@@ -34,6 +34,7 @@ src/contract/   zod schemas: the contract itself, no Nest imports
   status.ts     DB status → statusKey, badge, owner, steps (mapStatus)
   errors.ts     error codes, HTTP statuses, details shapes
 src/common/     StudioException, the error filter, @ApiErrors, @RequireIdempotencyKey, @CurrentWorkspace
+src/credits/    CreditsService (run, hold, charge, release), prices, the /portal/me workspace cache
 src/portal/     controllers and DTOs over the contract
 src/openapi.ts  builds the document for /docs and openapi.json
 ```
@@ -45,6 +46,10 @@ Schema `studio` in `foo_platform`, beside `auth` and `billing`. The source of tr
 - `prisma/schema.prisma` has the tables. Its migrations add what Prisma can't express: CHECKs, partial indexes, and `studio_app`'s grants. A later `prisma migrate dev` will offer to drop those partial indexes; keep them.
 - Ids are UUIDv7 from Postgres 18's `uuidv7()`. `workspace.id` is the billing client id.
 - `scripts/roles/` sets up an environment's two roles (`studio_migrator`, `studio_app`). Create them over SQL, never in the Neon console; [scripts/roles/README.md](scripts/roles/README.md) explains why.
+
+### Credits
+
+Every credit movement goes through `CreditsService` (FS-92): `credits.run(workspaceId, fn)` opens one transaction, `hold`, `charge` and `release` lock the workspace row `FOR UPDATE` inside it, and the `/portal/me` cache is invalidated after the commit. Monthly credits (`grant_balance`) are spent before top-up (`topup_balance`); a charge that spans both writes two ledger rows. A charge's idempotency key is `usage:<requestId>:<action>` (the top-up half of a split charge adds `:topup`), so a retry writes nothing. `credit_ledger` is append-only. Prices come from the `credit_prices` setting.
 
 Locally, against the Docker Postgres 18 container:
 
