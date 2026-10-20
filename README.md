@@ -67,4 +67,20 @@ A test fails when the committed `openapi.json` no longer matches the code, so ru
 
 ## Branches
 
-Feature branch → PR into `development` → `uat` → `main` (production). Never PR a feature branch straight into `uat` or `main`.
+Code is promoted in one direction only. A merge that skips a step is the thing this rule exists to stop.
+
+```
+feat/* fix/* docs/*  ──PR─▶  development  ──PR─▶  uat  ──PR─▶  main
+```
+
+| PR base | Accepts a PR from | And from nothing else |
+|---|---|---|
+| `development` | any feature branch — `feat/*`, `fix/*`, `docs/*` | — |
+| `uat` | `development`, and only `development` | not a feature branch, not `main` |
+| `main` | `uat`, and only `uat` | not `development`, not a feature branch |
+
+So: a feature branch never targets `uat` or `main`, and `development` never targets `main`. Work reaches production by being promoted one branch at a time — feature into `development`, `development` into `uat`, `uat` into `main` — which is what keeps what UAT signs off on identical to what ships.
+
+`development` is the only branch that carries the latest code, and the only one feature work lands on. `uat` and `main` trail it: each takes a promotion when a release is cut, and nothing is committed to either directly. `uat` not being there between releases is normal — it is cut from `development` for a release, not kept alive.
+
+Branch names carry the ticket: `feat/fs-86-portal-me`, `docs/fs-33-neon-connection-role`.
