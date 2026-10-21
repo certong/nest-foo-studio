@@ -5,7 +5,7 @@ import { StudioException } from '../../common/studio-exception';
 import type { MeResponse } from '../../contract/requests';
 import { PrismaService } from '../../prisma/prisma.service';
 import { creditMeter, type CreditsView } from './credit-meter';
-import { WorkspaceCache } from './workspace-cache';
+import { WorkspaceCache } from '../../credits/workspace-cache';
 
 type Me = z.infer<typeof MeResponse>;
 

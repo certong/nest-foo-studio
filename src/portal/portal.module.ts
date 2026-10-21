@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { CreditsModule } from '../credits/credits.module';
+import { DropService } from './drafts/drop.service';
 import { ChangesController } from './changes.controller';
 import { ChatController } from './chat.controller';
 import { CreditsController } from './credits.controller';
 import { MeService } from './me/me.service';
-import { WorkspaceCache } from './me/workspace-cache';
 import { NewPageController } from './new-page.controller';
 import { RequestsController } from './requests.controller';
 import { UatController } from './uat.controller';
@@ -15,8 +16,8 @@ import { UatController } from './uat.controller';
  * ticket that adds a service splits its domain into its own module.
  */
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, CreditsModule],
   controllers: [RequestsController, ChatController, ChangesController, NewPageController, UatController, CreditsController],
-  providers: [MeService, WorkspaceCache],
+  providers: [MeService, DropService],
 })
 export class PortalModule {}
