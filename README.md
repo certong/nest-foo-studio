@@ -45,7 +45,7 @@ Schema `studio` in `foo_platform`, beside `auth` and `billing`. The source of tr
 
 - `prisma/schema.prisma` has the tables. Its migrations add what Prisma can't express: CHECKs, partial indexes, and `studio_app`'s grants. A later `prisma migrate dev` will offer to drop those partial indexes; keep them.
 - Ids are UUIDv7 from Postgres 18's `uuidv7()`. `workspace.id` is the billing client id.
-- `scripts/roles/` sets up an environment's two roles (`studio_migrator`, `studio_app`). Create them over SQL, never in the Neon console; [scripts/roles/README.md](scripts/roles/README.md) explains why.
+- `scripts/roles/` sets up an environment's two roles (`studio_migrator`, `studio_app`). Create them over SQL, never in the Neon console; [scripts/roles/README.md](scripts/roles/README.md) explains why. On Neon the service connects as the environment app role (`foo_development_app`, `foo_uat_app`, `foo_production_app`) rather than as those two, which means the append-only grants constrain it only locally — same file, [How the service actually connects on Neon](scripts/roles/README.md#how-the-service-actually-connects-on-neon).
 
 ### Credits
 
